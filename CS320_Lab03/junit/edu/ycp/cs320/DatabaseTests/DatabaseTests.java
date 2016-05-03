@@ -245,9 +245,16 @@ public class DatabaseTests {
 	public void ChangeUserNameTest() {
 		//SetUp
 		 
-		String name = "I am a Boss";
-		String newName = "theDonald";
-		String pswd = "pass";
+		String name = "JimNacho56";
+		String pswd = "theBest";
+		String last = "Nacho";
+		String first = "Jim";
+		String email = "jNacho@aol.com";
+		String type = "patron";
+		String newName = "JNach";
+				
+		// insert new book (and possibly new author) into DB
+		users = db.addUserToDatabase(name, pswd, email, type, first, last);
 		
 		users = db.changeUsername(name, newName, pswd);
 		if (users.size() > 0) {
@@ -260,7 +267,7 @@ public class DatabaseTests {
 				System.out.println("Changed username (username: " + name + ") successfully changed name to: <" + newName + ">");
 				
 				// 
-				List<User> users = db.DeleteUserFromDatabase(name, pswd);				
+				List<User> users = db.DeleteUserFromDatabase(newName, pswd);				
 			}
 		}
 		
