@@ -6,6 +6,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -355,24 +356,27 @@ public class DerbyDatabase implements IDatabase {
 		return executeTransaction(new Transaction<List<User>>() {
 			@Override
 			public List<User> execute(Connection conn) throws SQLException {
+				
 				PreparedStatement stmt = null;
 				PreparedStatement stmt2 = null;
-				ResultSet resultSet = null;
-
+				
+				ResultSet resultSet2 = null;
+				
 				try {
-
-
+					
 					stmt = conn.prepareStatement(
 							"update users " +
 									" set user_userName = ? " +
 									" where user_userName = ? " +
 									" and user_passWord = ? "
 							);
+
 					stmt.setString(1, newName);
 					stmt.setString(2, name);
 					stmt.setString(3, pswd);
 					stmt.executeUpdate();
 					System.out.printf("Querry Completed: Update user's name");
+
 					// return all users and see that the one entered was deleted
 					
 					stmt2 = conn.prepareStatement(
@@ -381,30 +385,33 @@ public class DerbyDatabase implements IDatabase {
 							);
 					//ensure new userName is in database
 					stmt2.setString(1, newName);
-					resultSet = stmt2.executeQuery();
-					System.out.printf("Where does the querry die?");
+
+					resultSet2 = stmt2.executeQuery();
+					System.out.printf("Where does the query die?");
+
 					List<User> result = new ArrayList<User>();
 					
 					Boolean found = false;
 
-					while (resultSet.next()) {
+					while (resultSet2.next()) {
 						found = true;
 
 						User u = new User();
-						loadUser(u, resultSet, 1);
+						loadUser(u, resultSet2, 1);
 						result.add(u);
 					}
-
+					
 					// check if the title was found
 					if (!found) {
-						System.out.println("<" + name + "> users list is empty");
+						System.out.println("<" + name + "> was not in users list");
 					}
 
 					return result;
 
 
 				} finally {
-					DBUtil.closeQuietly(resultSet);
+					
+					DBUtil.closeQuietly(resultSet2);
 					DBUtil.closeQuietly(stmt);
 					DBUtil.closeQuietly(stmt2);
 				}

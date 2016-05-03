@@ -29,6 +29,9 @@ public class DatabaseTests {
 	ArrayList<Menu> MenuList = null;
 	ArrayList<Order> OrderList = null;
 	List<Favorites> favList = null;
+	List<Menu> menu = null;
+	Menu m = null;
+
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -119,7 +122,7 @@ public class DatabaseTests {
 	@Test
 	public void getListOfRestaurantsByOwner() throws Exception{
 		System.out.println("\n*** Testing getListOfRestaurantsByOwner ***");
-		String username = "theDonald"; 
+		String username = "theExpress"; 
 		
 		restList = db.getListOfRestaurantsByOwner(username);
 		// NOTE: this is a simple test to check if no results were found in the DB
@@ -241,91 +244,84 @@ public class DatabaseTests {
 	@Test
 	public void ChangeUserNameTest() {
 		//SetUp
-		User TestUser = new User(); 
-		TestUser.setUserName("Imma Boss");
-		TestUser.setPassWord("password");
-
-		String newName = "I am a Boss"; 
-
-		//Why am I getting an unused error here. 
-		List<User> userlist = db.addUserToDatabase(TestUser.getUserName(), TestUser.getPassWord(), TestUser.getEmail(), TestUser.getAccountType(), TestUser.getFirstName(), TestUser.getLastName());
-
-		userlist = db.changeUsername(TestUser.getUserName(), newName, TestUser.getPassWord()); 
-
-
-		assertEquals("I am a Boss", TestUser.getUserName());
-
-		//Only print the message when the operation is successful. 
-		if(TestUser.getUserName() == newName) {
-			System.out.println("\n*** Changing Username ***");
+		 
+		String name = "I am a Boss";
+		String newName = "theDonald";
+		String pswd = "pass";
+		
+		users = db.changeUsername(name, newName, pswd);
+		if (users.size() > 0) {
+			userList = db.getAccountInfo(newName);
+			if (userList.isEmpty()) {
+				System.out.println("New username <" + newName + "> not found in table");
+				fail("Failed to change userName <" + name + "> to <" + newName + "> in user DB");
+			}
+			else {
+				System.out.println("Changed username (username: " + name + ") successfully changed name to: <" + newName + ">");
+				
+				// 
+				List<User> users = db.DeleteUserFromDatabase(name, pswd);				
+			}
 		}
+		
 	}
 
 	@Test
 	public void addItemToMenuTest() throws Exception {
-		//Set up
-		Restaurant r = new Restaurant(); 
-		Menu menu = new Menu(); 
-		String item1 = "pizza";
-		String item2 = "hotdog";
-		String item3 = "Special Brownies"; 
-		String price1 = "10.99";
-		String price2 ="3.00";
-		String price3 = "5.00";
-		//These caused a null pointer exception in the test. 
-		//r.getMenu().addToMenu(item1, 10.99);
-		//r.getMenu().addToMenu(item2, 4.99);
-		//r.getMenu().addToMenu(item3, 29.99);
+		System.out.println("\n*** Testing addUserToDataBase ***");
 
-		
-		
-		//I will work on fixing these tests tomorrow - 5/2/2016
-		List<Menu> menulist = db.addItemToMenu(item1, menu.getItemPrice(item1), r.getRestID());
-		menulist = db.addItemToMenu(item2, menu.getItemPrice(item2), r.getRestID());
-		menulist = db.addItemToMenu(item3, menu.getItemPrice(item3), r.getRestID());
+		String item = "burritos";
+		String price = "3.50";
+		String restName = "Bakers Donuts";
+				
+		// insert new book (and possibly new author) into DB
+		menu = db.addItemToMenu(item, price, restName);
 
-		//Test to make sure that the items were added. 
-		assertEquals(10.99, menulist.get(0).getItemPrice(item1), 0.001);
-		assertEquals(4.99, menulist.get(1).getItemPrice(item2), 0.001);
-		assertEquals(29.99, menulist.get(2).getItemPrice(item3), 0.001);
+		// check the return value - should be a book_id > 0
+		if (menu.size() > 0)
+		{
+			// try to retrieve the book and author from the DB
+			// get the list of (Author, Book) pairs from DB
+			m = db.getPriceOfMenuItem(item);
 
-		assertEquals(3, menulist.size());
-		if(menulist.isEmpty()) {
-			System.out.println("Error. No items were added to the menu");
-			fail("Something has gone terribly wrong"); 
-		}
-		else {
-			MenuList= new ArrayList<Menu>(); 
-			for(Menu m: MenuList) {
-				MenuList.add(m);
-				System.out.println("Adding Items"); 
+			if (m == null) {
+				System.out.println("No items called <" + item + ">");
+				fail("Failed to insert new book <" + item + "> into menu DB");
+			}
+			// otherwise, the test was successful.  Now remove the book just inserted to return the DB
+			// to it's original state, except for using an author_id and a book_id
+			else {
+				System.out.println("New item (item: " + item + ") successfully added to menu table: <" + price + ">");
+				
+				// now delete Book (and its Author) from DB
+				// leaving the DB in its previous state - except that an author_id, and a book_id have been used
+				Menu delMenu = db.deleteFromMenu(item);				
 			}
 		}
-
 
 	}
 
 	@Test
 	public void getMenuByRestName() throws Exception {
-		//Set up
-		Restaurant Rest = new Restaurant(); 
-		String desiredName = "PizzaPain"; 
-		Rest.setName("PizzaPain");
-
-		List<Menu> menulist = new ArrayList<Menu>(); 
-		menulist = db.menuByRestName(desiredName);
-
-		if(menulist.isEmpty()) {
-			System.out.println("No menus to find");
-			fail("Manuel! Go get the Menus!");
+		System.out.println("\n*** Testing getmenuByRestName ***");
+		String rest = "Bakers Donuts"; 
+		
+		menu = db.menuByRestName(rest);
+		// NOTE: this is a simple test to check if no results were found in the DB
+		if (menu.isEmpty()) {
+			System.out.println("No menu found for <" + rest + ">");
+			fail("No menu for <" + rest + "> returned from Library DB");
 		}
-		else {
-			for(Menu M: MenuList) {
-				MenuList.add(M); //this needs to be revised I know it is wrong. 
-				System.out.println("Retrieving Menu");
-			}
-		}
-
+		// NOTE: assembling the results into Author and Book lists so that they could be
+		//       inspected for correct content - well-formed objects with correct content
+		else {			
+			System.out.println("Menu found for (rest: " + rest);
+			
+			// now delete Book (and its Author) from DB
+			// leaving the DB in its previous state - except that an author_id, and a book_id have been used
+			
+			}			
+		
 	}
 
 	//@Test
@@ -359,172 +355,172 @@ public class DatabaseTests {
 		//need another condition here for returns.	
 	}
 
-	//@Test
-	public void createOrderInTableTest() {
-
-		Order o = new Order();
-		Order o2 = new Order();
-		Order o3 = new Order();
-		User p = new User(); 
-		User p2= new User(); 
-		Restaurant r = new Restaurant();  
-		Restaurant r2 = new Restaurant();  
-
-		List<Order> orderList = new ArrayList<Order>(); 
-		
-		//I will work on fixing these tests tomorrow - 5/2/2016
-		orderList = db.ceateOrderInTable(p.getUserId(), o.getorderNumber(), r.getMenu().getItem(), r.getMenu().getItemPrice(r.getMenu().getItem()));
-		assertEquals(1, orderList.size());
-		orderList = db.ceateOrderInTable(p.getUserId(), o2.getorderNumber(), r.getMenu().getItem(), r.getMenu().getItemPrice(r.getMenu().getItem()));
-		assertEquals(2, orderList.size());
-		orderList = db.ceateOrderInTable(p2.getUserId(), o3.getorderNumber(), r2.getMenu().getItem(), r2.getMenu().getItemPrice(r2.getMenu().getItem()));
-		assertEquals(1, orderList.size());
-
-		if(orderList.isEmpty()) {
-			System.out.println("Why is no one ordering anything!?");
-			fail("Manuel!!");
-		}
-		else {
-			for (Order O: OrderList){
-				OrderList.add(O); 
-				System.out.println("Creating Orders"); 
-			}
-		}
-
-
-	}
-
-	public void getAccountInfoTest() throws Exception {
-		String Username1 = "theDonald";
-		String Username2 = "theExpress";
-		String Username3 = "userGuy";
-		String Username4 = "anotherUser";
-		List<User> listofUsers = new ArrayList<User>(); 
-		
-		listofUsers = db.getAccountInfo(Username1);
-		assertEquals(1, listofUsers.size());
-		
-		listofUsers = db.getAccountInfo(Username2);
-		assertEquals(2, listofUsers.size());
-		
-		listofUsers = db.getAccountInfo(Username3);
-		assertEquals(3, listofUsers.size());
-		
-		listofUsers = db.getAccountInfo(Username4);
-		assertEquals(4, listofUsers.size());
-		
-		if(listofUsers.isEmpty()) {
-			System.out.println("There are no users to retrieve information for");
-			fail("We need more users!");
-		}
-		else {
-			userlist = new ArrayList<User>(); 
-			for(User u: listofUsers){
-				userlist.add(u);
-				System.out.println(u.getUserName() + "," + u.getUserId()+ ","+ u.getEmail() + "," + u.getFirstName() + "," + u.getLastName());
-			}
-		}
-	}
-
-
-
-	public void getOrderByConfirmNumber() throws Exception {
-
-		Integer ConfirmNumber = 1345;
-		List<Order> orderList = new ArrayList<Order>(); 
-
-		orderList = db.getOrderByConfirmationNumber(ConfirmNumber);
-		assertEquals(1, orderList.size());
-
-		if(orderList.isEmpty()) {
-			System.out.println("There are no orders with this number");
-			fail("Re enter the order number");
-		}
-		else{
-			OrderList = new ArrayList<Order>(); 
-			for(Order o: orderList) {
-				OrderList.add(o);
-				System.out.println("Adding orders to the database");
-			}
-		}
-	}
-
-	public void deleteFromMenuTest() {
-		//Need to add something in order to remove it 
-		String item2 = "Special Brownies"; 
-		Menu testMenu = new Menu(); 
-
-		String Rest_ID = "Tom's Grill"; 
-		List<Menu> menulist = new ArrayList<Menu>(); 
-
-		menulist = db.addItemToMenu(item2, 4.99, Rest_ID);
-
-		//This is more like a regular JUnit test. 
-		//The function looks like it returns items, not removes them.
-		testMenu = db.deleteFromMenu(item2); 
-
-	}
-
-	public void getOrdersFromRestaurantTest() throws Exception{
-		//Need to run the application to see how many orders there are. 
-		String RestName = "Trump's Steaks"; 
-		List<Order> orderlist = new ArrayList<Order>(); 
-
-		orderlist = db.getOrdersByRestaurant(RestName); 
-		assertEquals(2, orderlist.size()); 
-
-		if(orderlist.isEmpty()) {
-			System.out.println("There are no orders from that restaurant. Perhaps you can be the first");
-			fail("Order something, then this will be populated"); 
-		}
-		else {
-			OrderList = new ArrayList<Order>(); 
-			for (Order o: orderlist) {
-				OrderList.add(o);
-				System.out.println("Adding orders to the list");
-			}
-		}
-	}
-
-
-	public void getOrderByPatronName() throws Exception{
-		//Another one ill need to run the application to ensure the tests fully run. 
-		String patronName = "userGuy"; 
-		List<Order> orderlist = new ArrayList<Order>(); 
-		
-		orderlist = db.getOrderByPatronUname(patronName);
-		assertEquals(2, orderlist.size()); 
-		
-		if(orderlist.isEmpty()) {
-			System.out.println("This user has no orders");
-			fail("Maybe this user shouldn't be such a slacker");
-		}
-		
-		else{
-			OrderList = new ArrayList<Order>(); 
-			for (Order o: orderlist) {
-				OrderList.add(o);
-				System.out.println("Adding user orders to the database");
-			}
-		}
-	}
-
-	public void UpdateOrderStatusTest() {
-		Order testOrder = new Order(); 
-		List<Order> orderlist = new ArrayList<Order>(); 
-		orderlist = db.updateOrderStatus(testOrder.getStatus(), testOrder.getorderNumber());
-		if(orderlist.isEmpty()) {
-			System.out.println("There are no orders to update");
-			fail("Manuel!");
-		}
-		else {
-			OrderList = new ArrayList<Order>(); 
-			for(Order o : orderlist) {
-				OrderList.add(o);
-				System.out.println("");
-			}
-		}
-	}
+//	//@Test
+//	public void createOrderInTableTest() {
+//
+//		Order o = new Order();
+//		Order o2 = new Order();
+//		Order o3 = new Order();
+//		User p = new User(); 
+//		User p2= new User(); 
+//		Restaurant r = new Restaurant();  
+//		Restaurant r2 = new Restaurant();  
+//
+//		List<Order> orderList = new ArrayList<Order>(); 
+//		
+//		//I will work on fixing these tests tomorrow - 5/2/2016
+//		orderList = db.ceateOrderInTable(p.getUserId(), o.getorderNumber(), r.getMenu().getItem(), r.getMenu().getItemPrice(r.getMenu().getItem()));
+//		assertEquals(1, orderList.size());
+//		orderList = db.ceateOrderInTable(p.getUserId(), o2.getorderNumber(), r.getMenu().getItem(), r.getMenu().getItemPrice(r.getMenu().getItem()));
+//		assertEquals(2, orderList.size());
+//		orderList = db.ceateOrderInTable(p2.getUserId(), o3.getorderNumber(), r2.getMenu().getItem(), r2.getMenu().getItemPrice(r2.getMenu().getItem()));
+//		assertEquals(1, orderList.size());
+//
+//		if(orderList.isEmpty()) {
+//			System.out.println("Why is no one ordering anything!?");
+//			fail("Manuel!!");
+//		}
+//		else {
+//			for (Order O: OrderList){
+//				OrderList.add(O); 
+//				System.out.println("Creating Orders"); 
+//			}
+//		}
+//
+//
+//	}
+//
+//	public void getAccountInfoTest() throws Exception {
+//		String Username1 = "theDonald";
+//		String Username2 = "theExpress";
+//		String Username3 = "userGuy";
+//		String Username4 = "anotherUser";
+//		List<User> listofUsers = new ArrayList<User>(); 
+//		
+//		listofUsers = db.getAccountInfo(Username1);
+//		assertEquals(1, listofUsers.size());
+//		
+//		listofUsers = db.getAccountInfo(Username2);
+//		assertEquals(2, listofUsers.size());
+//		
+//		listofUsers = db.getAccountInfo(Username3);
+//		assertEquals(3, listofUsers.size());
+//		
+//		listofUsers = db.getAccountInfo(Username4);
+//		assertEquals(4, listofUsers.size());
+//		
+//		if(listofUsers.isEmpty()) {
+//			System.out.println("There are no users to retrieve information for");
+//			fail("We need more users!");
+//		}
+//		else {
+//			userlist = new ArrayList<User>(); 
+//			for(User u: listofUsers){
+//				userlist.add(u);
+//				System.out.println(u.getUserName() + "," + u.getUserId()+ ","+ u.getEmail() + "," + u.getFirstName() + "," + u.getLastName());
+//			}
+//		}
+//	}
+//
+//
+//
+//	public void getOrderByConfirmNumber() throws Exception {
+//
+//		Integer ConfirmNumber = 1345;
+//		List<Order> orderList = new ArrayList<Order>(); 
+//
+//		orderList = db.getOrderByConfirmationNumber(ConfirmNumber);
+//		assertEquals(1, orderList.size());
+//
+//		if(orderList.isEmpty()) {
+//			System.out.println("There are no orders with this number");
+//			fail("Re enter the order number");
+//		}
+//		else{
+//			OrderList = new ArrayList<Order>(); 
+//			for(Order o: orderList) {
+//				OrderList.add(o);
+//				System.out.println("Adding orders to the database");
+//			}
+//		}
+//	}
+//
+//	public void deleteFromMenuTest() {
+//		//Need to add something in order to remove it 
+//		String item2 = "Special Brownies"; 
+//		Menu testMenu = new Menu(); 
+//
+//		String Rest_ID = "Tom's Grill"; 
+//		List<Menu> menulist = new ArrayList<Menu>(); 
+//
+//		menulist = db.addItemToMenu(item2, 4.99, Rest_ID);
+//
+//		//This is more like a regular JUnit test. 
+//		//The function looks like it returns items, not removes them.
+//		testMenu = db.deleteFromMenu(item2); 
+//
+//	}
+//
+//	public void getOrdersFromRestaurantTest() throws Exception{
+//		//Need to run the application to see how many orders there are. 
+//		String RestName = "Trump's Steaks"; 
+//		List<Order> orderlist = new ArrayList<Order>(); 
+//
+//		orderlist = db.getOrdersByRestaurant(RestName); 
+//		assertEquals(2, orderlist.size()); 
+//
+//		if(orderlist.isEmpty()) {
+//			System.out.println("There are no orders from that restaurant. Perhaps you can be the first");
+//			fail("Order something, then this will be populated"); 
+//		}
+//		else {
+//			OrderList = new ArrayList<Order>(); 
+//			for (Order o: orderlist) {
+//				OrderList.add(o);
+//				System.out.println("Adding orders to the list");
+//			}
+//		}
+//	}
+//
+//
+//	public void getOrderByPatronName() throws Exception{
+//		//Another one ill need to run the application to ensure the tests fully run. 
+//		String patronName = "userGuy"; 
+//		List<Order> orderlist = new ArrayList<Order>(); 
+//		
+//		orderlist = db.getOrderByPatronUname(patronName);
+//		assertEquals(2, orderlist.size()); 
+//		
+//		if(orderlist.isEmpty()) {
+//			System.out.println("This user has no orders");
+//			fail("Maybe this user shouldn't be such a slacker");
+//		}
+//		
+//		else{
+//			OrderList = new ArrayList<Order>(); 
+//			for (Order o: orderlist) {
+//				OrderList.add(o);
+//				System.out.println("Adding user orders to the database");
+//			}
+//		}
+//	}
+//
+//	public void UpdateOrderStatusTest() {
+//		Order testOrder = new Order(); 
+//		List<Order> orderlist = new ArrayList<Order>(); 
+//		orderlist = db.updateOrderStatus(testOrder.getStatus(), testOrder.getorderNumber());
+//		if(orderlist.isEmpty()) {
+//			System.out.println("There are no orders to update");
+//			fail("Manuel!");
+//		}
+//		else {
+//			OrderList = new ArrayList<Order>(); 
+//			for(Order o : orderlist) {
+//				OrderList.add(o);
+//				System.out.println("");
+//			}
+//		}
+//	}
 	@Test
 	public void addToFavoriteRests() {
 		System.out.println("\n*** Testing addToFavoriteRests ***");
