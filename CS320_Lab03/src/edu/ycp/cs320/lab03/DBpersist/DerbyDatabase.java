@@ -297,21 +297,11 @@ public class DerbyDatabase implements IDatabase {
 
 				try {
 
-
-					stmt = conn.prepareStatement(
-							"delete from users " +
-									" where user_userName = ? " +
-									" and user_passWord = ? "
-							);
-					stmt.setString(1, name);
-					stmt.setString(2, pswd);
-					stmt.executeUpdate();
-
-					// return all users and see that the one entered was deleted
-					
 					stmt2 = conn.prepareStatement(
-							"select * from users " 		
+							"select * from users " +
+									"where user_userName = ?"
 							);
+					stmt2.setString(1, name);
 					resultSet = stmt2.executeQuery();
 					List<User> result = new ArrayList<User>();
 					
@@ -324,6 +314,22 @@ public class DerbyDatabase implements IDatabase {
 						loadUser(u, resultSet, 1);
 						result.add(u);
 					}
+					
+					stmt = conn.prepareStatement(
+							"delete from users " +
+									" where user_Id = ? "
+							);
+					stmt.setInt(1, result.get(0).getUserId());
+//					stmt.setString(2, result.get(0).getUsername());
+//					stmt.setString(3, result.get(0).getPassWord());
+//					stmt.setString(4, result.get(0).getEmail());
+//					stmt.setString(5, result.get(0).getAccountType());
+//					stmt.setString(6, result.get(0).getFirstName());
+//					stmt.setString(7, result.get(0).getLastName());
+					stmt.executeUpdate();
+
+					// return all users and see that the one entered was deleted
+					
 
 					// check if the title was found
 					if (!found) {

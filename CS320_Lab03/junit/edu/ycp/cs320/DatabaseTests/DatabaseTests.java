@@ -12,6 +12,7 @@ import org.junit.Test;
 import edu.ycp.cs320.lab03.DBpersist.DatabaseProvider;
 import edu.ycp.cs320.lab03.DBpersist.DerbyDatabase;
 import edu.ycp.cs320.lab03.DBpersist.IDatabase;
+import edu.ycp.cs320.lab03.model.Favorites;
 import edu.ycp.cs320.lab03.model.Menu;
 import edu.ycp.cs320.lab03.model.Order;
 import edu.ycp.cs320.lab03.model.Owner;
@@ -26,7 +27,8 @@ public class DatabaseTests {
 	List<User> userList = null;
 	List<User> users = null; 
 	ArrayList<Menu> MenuList = null;
-	ArrayList<Order> OrderList = null; 
+	ArrayList<Order> OrderList = null;
+	List<Favorites> favList = null;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -186,7 +188,7 @@ public class DatabaseTests {
 		}
 		else {
 			users = new ArrayList<User>(); 
-			for(User u : users) {
+			for(User u : userList) {
 				users.add(u); 
 				System.out.println(u.getUserName() + ", " + u.getFirstName() + ", " + u.getLastName());
 			}
@@ -195,43 +197,46 @@ public class DatabaseTests {
 
 	@Test
 	public void deleteUserFromDatabase() throws Exception {
-		System.out.println("\n *** Removing Users from Database ***");
-
-
-		//SetUp: copied from the test above to give us something to remove. 
-		User UserToBeEntered1 = new User(); 
-		User UserToBeEntered2 = new User();
-		User UserToBeEntered3 = new User(); 
-
-		//We need to set up these conditions for the removal function. 
-		UserToBeEntered1.setUserName("User1");
-		UserToBeEntered2.setUserName("User2");
-		UserToBeEntered3.setUserName("User3");
-
-		UserToBeEntered1.setPassWord("passWord");
-		UserToBeEntered2.setPassWord("Guest");
-		UserToBeEntered3.setPassWord("Admin"); 
-
-		//Need to add something in order to delete it. 
-		List<User> userlist = db.addUserToDatabase(UserToBeEntered1.getUserName(), UserToBeEntered1.getPassWord(), UserToBeEntered1.getEmail(), UserToBeEntered1.getAccountType(), UserToBeEntered1.getFirstName(), UserToBeEntered1.getLastName());	
-		userlist = db.addUserToDatabase(UserToBeEntered2.getUserName(), UserToBeEntered2.getPassWord(), UserToBeEntered2.getEmail(), UserToBeEntered2.getAccountType(), UserToBeEntered2.getFirstName(), UserToBeEntered2.getLastName());
-		userlist = db.addUserToDatabase(UserToBeEntered3.getUserName(), UserToBeEntered3.getPassWord(), UserToBeEntered3.getEmail(), UserToBeEntered3.getAccountType(), UserToBeEntered3.getFirstName(), UserToBeEntered3.getLastName());
-
-
-		//Test Cases
-		assertEquals(3, userlist.size()); //each time I run this test, at this point the number of users increases.
-
-		userlist = db.DeleteUserFromDatabase("User1", "passWord");
-		assertEquals(2, userlist.size()); 
-
-		userlist = db.DeleteUserFromDatabase("User2", "Guest");
-		assertEquals(1, userlist.size()); 
-
-		userlist = db.DeleteUserFromDatabase("User3", "Admin");
-		assertEquals(0, userlist.size()); 
-		//Hopefully the database gets deincrememnted like specified. Can't remove 
-		//two users at the same time(at least right now). 
-	}
+		System.out.println("\n*** Testing deleteUserFromDatabase ***");
+		
+		String name = "JimNacho56";
+		String pswd = "theBest";
+		String last = "Nacho";
+		String first = "Jim";
+		String email = "jNacho@aol.com";
+		String type = "patron";
+				
+		// insert new book (and possibly new author) into DB
+		users = db.addUserToDatabase(name, pswd, email, type, first, last);
+		// check to see that insertion was successful before proceeding
+		if (users.size() > 0) {
+			// now delete Book (and its Author) from DB
+			List<User> removedUser = db.DeleteUserFromDatabase(name, pswd);
+			
+			if (removedUser.isEmpty()) {
+				System.out.println("Failed to remove User(s) for book with username <" + name + ">");
+				fail("No User(s) removed from DB for  username <" + name + ">");
+			}
+			else {
+				System.out.println("User <" + removedUser.get(0).getFirstName() + ", " + removedUser.get(0).getLastName() + "> removed from User DB");
+			}					
+			
+			// get the list of (Author, Book) pairs from DB
+			userList = db.getAccountInfo(name);
+			
+			if (userList.isEmpty()) {
+				System.out.println("User with name <" + name + "> were removed from the Users DB");
+			}
+			else {
+				fail("User with name <" + name + "> remains in Library DB after delete");			
+			}
+		}
+		else {
+			System.out.println("Failed to insert new User (ID: " + name + ") into User table: <" + name + ">");
+			fail("Failed to insert new user <" + name + "> into Users DB");			
+		}
+	} 
+	
 
 	@Test
 	public void ChangeUserNameTest() {
@@ -422,32 +427,6 @@ public class DatabaseTests {
 	}
 
 
-	public void getRestaurantsByOwnerTest() throws Exception {
-		String OwnerName = "TheDonald";
-		String NonOwnerName = "Some bum off the street";
-		List<Restaurant>restaurantCount = new ArrayList<Restaurant>(); 
-
-		System.out.println("*** Searching for Restaurants by Owner name ***");
-
-		restaurantCount = db.getListOfRestaurantsByOwner(OwnerName);
-		assertEquals(1, restaurantCount.size());
-
-		restaurantCount = db.getListOfRestaurantsByOwner(NonOwnerName);
-		assertNotEquals(2, restaurantCount.size()); 
-
-		if(restaurantCount.isEmpty()) {
-			System.out.println("That user has no restaurants");
-			fail("Sorry for the confusion");
-		}
-
-		else {
-			restlist = new ArrayList<Restaurant>(); 
-			for(Restaurant r : restaurantCount) {
-				restlist.add(r);
-				System.out.println(r.getName() + ", " + r.getAddress() + ", " + r.getCity() + ", " + r.getZipCode()); 
-			}
-		}
-	}
 
 	public void getOrderByConfirmNumber() throws Exception {
 
@@ -546,39 +525,33 @@ public class DatabaseTests {
 			}
 		}
 	}
+	@Test
+	public void addToFavoriteRests() {
+		System.out.println("\n*** Testing addToFavoriteRests ***");
 
-	public void addToFavsTest() {
-		
-		User testUser = new User(); 
-		String restName1 = "Bakers Donuts"; 
-		String restName2 = "Johnson";
-		String restName3 = "Toms grill";
-		String restName4 = "Trumps Steaks";
-		List<Restaurant> restList = new ArrayList<Restaurant>(); 
-		
-		restList = db.addToFavoriteRests(restName1, testUser.getUserId());
-		assertEquals(4, restList.size());
-		
-		restList = db.addToFavoriteRests(restName2, testUser.getUserId());
-		assertEquals(4, restList.size());
-		
-		restList = db.addToFavoriteRests(restName3, testUser.getUserId());
-		assertEquals(4, restList.size());
-		
-		restList = db.addToFavoriteRests(restName4, testUser.getUserId());
-		assertEquals(4, restList.size());
-		
-		if(restList.isEmpty()) {
-			System.out.println("Cannot add restaurant to favorites list");
-			fail("Try searching again");
+		String name = "JimNacho56";
+		String pswd = "theBest";
+		String last = "Nacho";
+		String first = "Jim";
+		String email = "jNacho@aol.com";
+		String type = "patron";
+		String rest = "Trumps Steaks";
+		// insert new book (and possibly new author) into DB
+		users = db.addUserToDatabase(name, pswd, email, type, first, last);
+		favList = db.addToFavoriteRests(rest, users.get(0).getUserId());
+		// check the return value - should be a book_id > 0
+		if (favList.isEmpty()) {
+			System.out.println("No rests found in Favorites <" + rest + ">");
+			fail("Failed to insert new rest <" + rest + "> into Favorites DB");
 		}
-		else 
-			restlist = new ArrayList<Restaurant>(); 
-			for(Restaurant r : restList) {
-				restlist.add(r);
-				System.out.println("Adding restaurant to user favorites");
+			// otherwise, the test was successful.  Now remove the book just inserted to return the DB
+			// to it's original state, except for using an author_id and a book_id
+			else {
+				System.out.println("New rest (rest: " + rest + ") successfully added to rest table: <" + rest + ">");
+								
 			}
-	}
+		}
+	
 }
 
 
