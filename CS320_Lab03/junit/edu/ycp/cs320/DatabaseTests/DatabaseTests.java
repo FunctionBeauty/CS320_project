@@ -466,18 +466,7 @@ public class DatabaseTests {
 	}
 
 	public void deleteFromMenuTest() {
-		//Need to add something in order to remove it 
-		String item2 = "Special Brownies"; 
-		Menu testMenu = new Menu(); 
-
-		String Rest_ID = "Tom's Grill"; 
-		List<Menu> menulist = new ArrayList<Menu>(); 
-
-		menulist = db.addItemToMenu(item2, 4.99, Rest_ID);
-
-		//This is more like a regular JUnit test. 
-		//The function looks like it returns items, not removes them.
-		testMenu = db.deleteFromMenu(item2); 
+		
 
 	}
 
