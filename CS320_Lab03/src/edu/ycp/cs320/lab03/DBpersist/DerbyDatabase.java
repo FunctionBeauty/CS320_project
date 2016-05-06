@@ -950,13 +950,12 @@ public class DerbyDatabase implements IDatabase {
 					stmt.executeUpdate();
 
 					// return all users and see that the one entered was deleted
-					
 					stmt2 = conn.prepareStatement(
-							"select * from users " 	+
-									" where user_userName = ? "
+							"select * from orders " 	+
+									" where order_number = ? "
 							);
 					//ensure new userName is in database
-					stmt2.setString(1, status);
+					stmt2.setInt(1, orderNum);
 					resultSet = stmt2.executeQuery();
 					List<Order> result = new ArrayList<Order>();
 					

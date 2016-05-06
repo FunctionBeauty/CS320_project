@@ -50,8 +50,8 @@ public class DatabaseTests {
 		db = DatabaseProvider.getInstance();
 
 	}
-	
-	
+
+
 
 	@After
 	public void tearDown() throws Exception {
@@ -174,13 +174,13 @@ public class DatabaseTests {
 			}
 		}
 	}
-	
+
 	@Test
 	public void getAccountInfoTest() throws Exception {
 		String Username1 = "theDonald";
-//		String Username2 = "theExpress";
-//		String Username3 = "userGuy";
-//		String Username4 = "anotherUser";
+		//		String Username2 = "theExpress";
+		//		String Username3 = "userGuy";
+		//		String Username4 = "anotherUser";
 		List<User> listofUsers = new ArrayList<User>(); 
 
 		listofUsers = db.getAccountInfo(Username1);
@@ -197,8 +197,8 @@ public class DatabaseTests {
 			}
 		}
 	}
-	
-	
+
+
 
 	@Test 
 	public void MatchUsersWithPassword() throws Exception {
@@ -265,8 +265,8 @@ public class DatabaseTests {
 
 	@Test
 	public void ChangeUserNameTest() {
-		//SetUp
 
+		System.out.println("\n*** Testing ChangerUsername ***");
 		String name = "JimNacho56";
 		String pswd = "theBest";
 		String last = "Nacho";
@@ -338,47 +338,17 @@ public class DatabaseTests {
 			System.out.println("No menu found for <" + rest + ">");
 			fail("No menu for <" + rest + "> returned from Library DB");
 		}
-		
+
 		else {			
 			System.out.println("Menu found for (rest: " + rest);
 		}
 		//test getting price off menu
-		assertEquals(menu.get(0).getItemPrice("Hot Dog"), 1.00d, .000001);
-		
+		assertEquals(menu.get(0).getPrice(), "1.00");
+
 
 	}
 
-	//@Test
-	public void getPriceOffMenuTest() throws Exception {
-		//Set up
-		Menu m = new Menu();
-		String item1 = "Pizza"; 
-		String item2 = "Hamburger";
-		String item3 = "Hit in Head";
 
-		m.addToMenu(item1, 7.99);
-		m.addToMenu(item2, 6.99);
-		m.addToMenu(item3, 0.99);
-
-		List<Menu> menulist = new ArrayList<Menu>();
-
-		//Operations and conditions 
-		menulist = (List<Menu>) db.getPriceOfMenuItem(item1); 
-		assertEquals(7.99, menulist.get(0).getItemPrice(item1), 0.001);
-
-		menulist = (List<Menu>) db.getPriceOfMenuItem(item2);
-		assertEquals(6.99, menulist.get(1).getItemPrice(item2), 0.001);
-
-		menulist = (List<Menu>) db.getPriceOfMenuItem(item3);
-		assertEquals(6.99, menulist.get(2).getItemPrice(item3), 0.001);
-
-		if(menulist.isEmpty()){
-			System.out.println("There is no menu present");
-			fail("This has gotten rather silly"); 
-		}
-		//need another condition here for returns.	
-	}
-	
 	@Test
 	public void getOrderTest() throws Exception {
 		System.out.println("*****Testing getting orders*****");
@@ -401,18 +371,30 @@ public class DatabaseTests {
 		String price = "1.00";
 		String status = "pending";
 		this.orderList = db.ceateOrderInTable(patId, rest, orderNum, item, quantity, price, status);
-		
+
 		if(orderList.isEmpty()){
 			System.out.println("No order was created for patron with id <" + patId + ">");
 			fail("Failed to insert new order for patron <" + patId + "> into Favorites DB");
 		}
-		else
+		else{
 			System.out.println("New order for patron (id: " + patId + ") successfully added to orders table: <" + orderList + ">");
+		}
 		//test get by confirmation number
 		List<Order> orderNumChecker = new ArrayList<Order>();
 		orderNumChecker = db.getOrderByConfirmationNumber(orderNum);
 		assertEquals(0, orderList.get(0).getorderNumber() - orderNumChecker.get(0).getorderNumber());
 		
+		//Test change order Status
+		
+		String newStatus = "In Progress";
+		orderList = db.updateOrderStatus(newStatus, orderNum);
+			if(orderList.isEmpty()){
+				System.out.println("No order was updated for orderNumber <" + orderNum + ">");
+				fail("Failed to update new order for order number <" + orderNum + ">");
+			}
+			else{
+				System.out.println("New order for orderNumber (id: " + orderNum + ") successfully updated in orders table: <" + orderList.get(0).getStatus() + ">");
+			}
 		//test get by pat Id
 		System.out.println(users.get(0).getUsername());
 		List<Order> orderByPatIdChecker = null;
@@ -421,25 +403,26 @@ public class DatabaseTests {
 			System.out.println("No order was created for patron with id <" + patId + ">");
 			fail("Failed to retrieve order from <" + patId + "> from orders DB");
 		}
-		else
+		else{
 			System.out.println("New order for patron (id: " + patId + ") successfully retrieved from orders table: <" + orderList + ">");
-		
+		}
 		//test getting orders by rest Name
 		List<Order> ordersByRestName = null;
 		ordersByRestName = db.getOrdersByRestaurant(rest);
 		if(ordersByRestName.isEmpty()){
 			System.out.println("No order was created for patron with id <" + patId + ">");
 			fail("Failed to retrieve order from <" + patId + "> from orders DB");
-	}
-	else
-		System.out.println("New order for rest (id: " + rest + ") successfully retrieved from orders table: <" + orderList + ">");
-		
+		}
+		else{
+			System.out.println("New order for rest (id: " + rest + ") successfully retrieved from orders table: <" + orderList + ">");
+		}
+
 		List<User> DelUsers = db.DeleteUserFromDatabase(name, pswd);
 	}
-	
-	
 
-	
+
+
+
 	@Test
 	public void addToFavoriteRests() {
 		System.out.println("\n*** Testing addToFavoriteRests ***");
@@ -459,14 +442,52 @@ public class DatabaseTests {
 			System.out.println("No rests found in Favorites <" + rest + ">");
 			fail("Failed to insert new rest <" + rest + "> into Favorites DB");
 		}
-		// otherwise, the test was successful.  Now remove the book just inserted to return the DB
-		// to it's original state, except for using an author_id and a book_id
+		// otherwise, the test was successful.  Now remove the user just inserted to return the DB
+		// to it's original state
 		else {
 			System.out.println("New rest (rest: " + rest + ") successfully added to rest table: <" + rest + ">");
 
 		}
 	}
 
+	@Test
+	public void deleteMenuItemTest(){
+		System.out.println("\n*** Testing addUserToDataBase ***");
+
+		String item = "burritos";
+		String price = "3.50";
+		String restName = "Bakers Donuts";
+
+
+		menu = db.addItemToMenu(item, price, restName);
+
+
+		if (menu.size() > 0){
+			Menu delMenu = db.deleteFromMenu(item);
+			if(delMenu == null){
+				System.out.println("Failed to remove item with name <" + item + ">");
+				fail("No items removed from DB for  name <" + item + ">");
+			}
+			else {
+				System.out.println("Item <" + item + "> removed from Menu DB");
+			}					
+
+			m = db.getPriceOfMenuItem(item);
+
+			if (m.equals("3.50")) {
+				fail("User with name <" + item + "> remains in Library DB after delete");
+
+			}
+			else {
+				System.out.println("User with name <" + item + "> were removed from the Users DB");		
+			}
+		}
+		else {
+			System.out.println("Failed to insert new User (ID: " + item + ") into User table: <" + item + ">");
+			fail("Failed to insert new user <" + item + "> into Users DB");			
+		}
+	}
 }
+
 
 
