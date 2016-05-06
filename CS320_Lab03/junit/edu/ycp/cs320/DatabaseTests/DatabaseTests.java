@@ -243,7 +243,7 @@ public class DatabaseTests {
 
 	@Test
 	public void ChangeUserNameTest() {
-		//SetUp
+		System.out.println("\n*** Testing ChangerUsername ***");
 		 
 		String name = "JimNacho56";
 		String pswd = "theBest";
