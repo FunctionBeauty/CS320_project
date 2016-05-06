@@ -35,8 +35,8 @@ public class GetOrder {
 			
 			return orders;
 	}
-		public ArrayList<Order> orderByUser(String username){
-			List<Order> orderList = db.getOrderByPatronUname(username);
+		public ArrayList<Order> orderByUser(int userId){
+			List<Order> orderList = db.getOrderByPatronUname(userId);
 			ArrayList<Order> orders = null;
 			
 			if (orderList.isEmpty()) {

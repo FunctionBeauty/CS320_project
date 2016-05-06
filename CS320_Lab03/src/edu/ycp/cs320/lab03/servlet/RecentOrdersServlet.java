@@ -26,21 +26,24 @@ public class RecentOrdersServlet extends HttpServlet {
 			return;
 		}
 		//Initialize variables
+		int userId = (int) req.getSession().getAttribute("userID");
 		order = new GetOrder();
 		ArrayList<Order> CustOrder = null;
 		ArrayList<Integer> orderNum= new ArrayList<Integer>();
 		//get all orders made by a customer
-		CustOrder = order.orderByUser(user);
+		CustOrder = order.orderByUser(userId);
 		//add the order number to the array to be displayed
-		for(int i=0; i<CustOrder.size(); i++){
-			if(orderNum.isEmpty()){
-				orderNum.add(CustOrder.get(0).getorderNumber());
-			}
-			else if(orderNum.contains(CustOrder.get(i).getorderNumber())){
-				int count = 0;
-			}
-			else{
-				orderNum.add(CustOrder.get(i).getorderNumber());
+		if(CustOrder!=null){
+			for(int i=0; i<CustOrder.size(); i++){
+				if(orderNum.isEmpty()){
+					orderNum.add(CustOrder.get(0).getorderNumber());
+				}
+				else if(orderNum.contains(CustOrder.get(i).getorderNumber())){
+					int count = 0;
+				}
+				else{
+					orderNum.add(CustOrder.get(i).getorderNumber());
+				}
 			}
 		}
 		//reverse the array to show the most recent ones on top

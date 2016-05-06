@@ -41,13 +41,13 @@ public interface IDatabase {
 	Menu deleteFromMenu(String item);
 
 	List<Order> getOrdersByRestaurant(String rest);
-
-	List<Order> getOrderByPatronUname(String username);
 	
 	List<Order> updateOrderStatus(String status, int orderNum);
 
 	List<Favorites> addToFavoriteRests(String rest, Integer userId);
 
 	List<Favorites> getFromFavorites(Integer userId);
+
+	List<Order> getOrderByPatronUname(int patId);
 	
 }

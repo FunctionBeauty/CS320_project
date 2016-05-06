@@ -57,27 +57,7 @@ public class DatabaseTests {
 	public void tearDown() throws Exception {
 	}
 
-	/*
-		@Test
-		public void testLoadUser() {
-
-		}
-
-		@Test
-		public void testLoadOwner() {
-
-		}
-
-		@Test
-		public void testLoadRestaurant() {
-
-		}
-
-		@Test
-		public void testLoadPatron() {
-
-		}
-	 */
+	
 
 	@Test
 	public void getListOfRestaurantsByCity() throws Exception {
@@ -398,7 +378,7 @@ public class DatabaseTests {
 		//test get by pat Id
 		System.out.println(users.get(0).getUsername());
 		List<Order> orderByPatIdChecker = null;
-		orderByPatIdChecker = db.getOrderByPatronUname(users.get(0).getUsername());
+		orderByPatIdChecker = db.getOrderByPatronUname(users.get(0).getUserId());
 		if(orderByPatIdChecker.isEmpty()){
 			System.out.println("No order was created for patron with id <" + patId + ">");
 			fail("Failed to retrieve order from <" + patId + "> from orders DB");

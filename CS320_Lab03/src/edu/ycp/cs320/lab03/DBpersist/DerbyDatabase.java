@@ -860,7 +860,7 @@ public class DerbyDatabase implements IDatabase {
 	//view past orders by a patron using the patron/user Id
 	//****************************************************
 	@Override
-	public List<Order> getOrderByPatronUname(final String username) {
+	public List<Order> getOrderByPatronUname(final int patId) {
 		return executeTransaction(new Transaction<List<Order>>() {
 			@Override
 			public List<Order> execute(Connection conn) throws SQLException {
@@ -874,17 +874,6 @@ public class DerbyDatabase implements IDatabase {
 				try {
 					//first, get patron id from users table 
 					//patron id is not available from jsp in this situation
-					stmt1 = conn.prepareStatement(
-							"select user_id" +
-									" from users " +
-									" where user_userName = ?"
-							);
-					stmt1.setString(1, username);
-					int patId = 0;
-					resultSet = stmt1.executeQuery();
-					while (resultSet.next()) {
-						patId = resultSet.getInt(1);
-					}
 					
 					//get order by order id
 					stmt = conn.prepareStatement(
@@ -1136,7 +1125,7 @@ public class DerbyDatabase implements IDatabase {
 	}
 
 	private Connection connect() throws SQLException {
-		Connection conn = DriverManager.getConnection("jdbc:derby:H:/workspace.newDBarea;create=true");
+		Connection conn = DriverManager.getConnection("jdbc:derby:C:/Users/austin/Desktop/CS201/eclipse/CS320_Project/project.db;create=true");
 
 		// Set autocommit to false to allow multiple the execution of
 		// multiple queries/statements as part of the same transaction.
