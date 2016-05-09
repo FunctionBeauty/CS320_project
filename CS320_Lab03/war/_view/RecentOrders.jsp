@@ -50,6 +50,11 @@ input[type=submit]{
 					<td>Status: </td>
 					<td> ${status}</td>
 				</tr>
+				<tr>
+					<td>Qty</td>
+					<td> Item</td>
+					<td>Price</td>
+				</tr>
 				</c:if>
 			<c:forEach items="${items}" var="item">
 					<tr>

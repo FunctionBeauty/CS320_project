@@ -101,6 +101,11 @@ input[type=submit]{
 					</tr>
 				</table>
 				<table>
+					<tr>
+						<td>Qty</td>
+						<td>Item</td>
+						<td>Price</td>
+					</tr>
 			<c:forEach items="${items}" var="item">
 					<tr>
 						<td class = "label">${item.quantity}</td>
