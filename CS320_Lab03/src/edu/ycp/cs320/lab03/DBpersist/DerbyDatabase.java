@@ -462,6 +462,68 @@ public class DerbyDatabase implements IDatabase {
 	//***********************
 	//Add item to menu
 	//************************
+	
+	//******************************
+	//add restaurant
+	//******************************
+	@Override
+	public List<Restaurant> addRestaurantToDatabase(final int ownerId, final String name, final String address, final String city,
+			final String zipCode) {
+		return executeTransaction(new Transaction<List<Restaurant>>() {
+			@Override
+			public List<Restaurant> execute(Connection conn) throws SQLException {
+				PreparedStatement stmt = null;
+				PreparedStatement stmt2 = null;
+				ResultSet resultSet = null;
+
+				try {
+					stmt = conn.prepareStatement(
+							"insert into Restaurants(rest_id, rest_name, rest_address, rest_city, rest_zipcode) " +
+									" values(?, ?, ?, ?, ?) "
+							);
+					stmt.setInt(1, ownerId);
+					stmt.setString(2, name);
+					stmt.setString(3, address);
+					stmt.setString(4, city);
+					stmt.setString(5, zipCode);
+					stmt.executeUpdate();
+					
+					stmt2 = conn.prepareStatement(
+							"select * " +
+									" from Restaurants " +
+									" where rest_name = ?"
+							);
+					stmt2.setString(1, name);
+					
+					resultSet = stmt2.executeQuery();
+
+					// for testing that a result was returned
+					Boolean found = false;
+					List<Restaurant> result = new ArrayList<Restaurant>();
+					while (resultSet.next()) {
+						found = true;
+						Restaurant u = new Restaurant();
+						loadRestaurant(u, resultSet, 1);
+						result.add(u);
+					}
+
+					// check if the title was found
+					if (!found) {
+						System.out.println("<" + name + "> was not found in the Restaurants table");
+					}
+
+					return result;
+
+
+				} finally {
+					DBUtil.closeQuietly(resultSet);
+					DBUtil.closeQuietly(stmt);
+					DBUtil.closeQuietly(stmt2);
+				}
+			}
+		});
+	}
+	
 	@Override
 	public List<Menu> addItemToMenu(final String item, final String price, final String rest_name) {
 		return executeTransaction(new Transaction<List<Menu>>() {
@@ -1351,6 +1413,7 @@ public class DerbyDatabase implements IDatabase {
 		System.out.println("austin got it the first time, you never will");
 		System.out.println("you got it this time, dont get cocky");
 	}
+	
 
 
 

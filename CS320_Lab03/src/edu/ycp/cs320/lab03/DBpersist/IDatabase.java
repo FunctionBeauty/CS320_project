@@ -49,5 +49,7 @@ public interface IDatabase {
 	List<Favorites> getFromFavorites(Integer userId);
 
 	List<Order> getOrderByPatronUname(int patId);
+
+	List<Restaurant> addRestaurantToDatabase(int ownerId, String name, String address, String city, String zipCode);
 	
 }
