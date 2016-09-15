@@ -44,7 +44,7 @@ table{
 		</form>
 		<c:if test="${! empty utype}">
 			<form action="${pageContext.servletContext.contextPath}/AddItem" method="get">
-					<td><input type="Submit" name="submit" value="Add Menu Item"/></td>
+					<td><input type="Submit" name="submit" value="Edit Menu"/></td>
 					</form>
 			</c:if>
 				<form action="${pageContext.servletContext.contextPath}/Homepage" method="get">

@@ -261,17 +261,22 @@ td.label {
 	<c:if test="${ empty rest}">
 		<div id="results">Make America Fat Again</div>
 		<div id="TrackNSnack">
-		Track N Snack was created and designed with the main goal
-		of making ordering food easier. Users can search for
-		restaurants, go to the restaurant's page, view the menu, 
-		place an order, and add the restaurant to a list of favorites.
-		For restaurants, the restaurant can update their menu, veiw
-		orders, as well as update the status of orders for the customers.
+		Track N Snack was created to: provide consumers the best possible dining options in any area of the country.
+
+		Enable users to browse local restaurants; Search by city.
+
+		Provide quick and easy ordering options in unfamiliar cities. 
+
+		Provide local restaurants access to more consumers;  Generic web page.
+
+		Level the playing field between local hot-spots and established, national chain restaurants; Admins choose which restaurants are available.
+
 		</div>
 	</c:if>
 	<div class="fixed">
-		<button>
-			<a href="/lab03/Login"><type="button">Logout </a>
-		</button>
+		<form action="${pageContext.servletContext.contextPath}/Login" method="get">
+		<input type="submit" name="submit" value="Logout">
+		</form>
+	</div>
 </body>
 </html>
